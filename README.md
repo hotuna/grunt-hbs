@@ -1,33 +1,56 @@
 # grunt-hbs
 
-Grunt Handlebars
+grunt handlebars html generator plugin
 
 ## Getting Started
 
+In `Gruntfile.js`:
 
+	grunt.initConfig({
+	
+	...
+	
+	 hbs:{
+	        options: {
+	          src: 'WebContents/frag/uidef',
+	          dest: 'WebContents/www/uidef'
+	        },
+	        all: {
+	          rules: [
+	            {url: "*.html" , layout: "layout.hbt"},
+	            {url: "foo/**/*.html" , layout: "foo/foo_layout.hbt"},
+	            {url: "foo/**/*.json" , layout: "foo/data_post.hbt"},
+	            ]
+	        }
+	    }
+	
+	...
+	});
+	
+	grunt.loadNpmTasks('grunt-hbs');
+  
 
-## hbs task
+run:
 
+	grunt hbs
 
 
 ### Options
 
-#### todo
+#### src
+
+doc root where contains template layout file(hbt) and html, json files
+
+#### dest
+
+desitinaiton root where html files to be generated
 
 
-### Usage Examples
-
-
-
-
-
-
-
-
+	
 
 ## Release History
 
- * 2013-08-23   v0.1.0   first release
+ * 2013-08-23 v0.1.1 first release
 
 ---
 

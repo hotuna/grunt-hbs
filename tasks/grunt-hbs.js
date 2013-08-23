@@ -38,8 +38,6 @@ module.exports = function(grunt) {
         var extension = filePath.substring(filePath.lastIndexOf('.') + 1);
         var content = '';
         
-        grunt.log.writeln('extension = ' + extension);
-        
         if (extension === 'html'){
            content = template({body: file});
         } else if (extension === 'json'){
