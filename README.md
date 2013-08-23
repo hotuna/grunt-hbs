@@ -2,7 +2,6 @@
 
 Grunt Handlebars
 
-
 ## Getting Started
 
 
