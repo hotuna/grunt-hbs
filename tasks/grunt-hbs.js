@@ -41,13 +41,14 @@ module.exports = function(grunt) {
         if (extension === 'html'){
            content = template({body: file});
         } else if (extension === 'json'){
-           content = template(JSON.stringify(file));
+           var obj = JSON.parse(file);
+           content = template(obj);
         } else{
            grunt.log.writeln(extension + ' is unknown file extension');
            return;
         }
         
-        var relativePath = filePath.substring(src.length + 1, filePath.lastIndexOf('.') + 1) + '.html';
+        var relativePath = filePath.substring(src.length + 1, filePath.lastIndexOf('.')) + '.html';
         
         var destFilePath = path.join(dest, relativePath);
         grunt.file.write(destFilePath, content);

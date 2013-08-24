@@ -51,7 +51,7 @@ desitinaiton root where html files to be generated
 ## Release History
 
  * 2013-08-23 v0.1.1 first release
-
+ * 2013-08-24 v0.1.3 updated: json file parse. file extension substring bug fix
 ---
 
 Task submitted by [June Park]
