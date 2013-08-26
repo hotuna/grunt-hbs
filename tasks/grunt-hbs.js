@@ -19,43 +19,73 @@ module.exports = function(grunt) {
     
     var options = this.options();
     
-    var src = options.src;
-    var dest = options.dest;
-    var rules = this.data.rules;
+    var srcs = this.data.src;
+    var dest = this.data.dest;
+    var cwd = this.data.cwd;
+    var rules = this.data.rules.slice();
+    
+    //pre compile template
+    _.each(rules, function(rule){
+      var layoutFilePath = path.join(cwd, rule.layout);
+      var layoutFileContent = grunt.file.read(layoutFilePath);
+      var template =  handlebars.compile(layoutFileContent);
+      rule.template = template;
+    });
     
     var count = 0;
     
-    _.each(rules, function(rule){
+    var executeGenerate = function(filePath, rule){
       
-      var layoutFilePath = path.join(src,rule.layout);
-
-      var layout = grunt.file.read(layoutFilePath);
-      var template =  handlebars.compile(layout);
-     
-      grunt.file.expand(path.join(src, rule.url)).map(function(filePath){
-        
-        var file = grunt.file.read(filePath);
-        var extension = filePath.substring(filePath.lastIndexOf('.') + 1);
-        var content = '';
-        
-        if (extension === 'html'){
-           content = template({body: file});
-        } else if (extension === 'json'){
-           var obj = JSON.parse(file);
-           content = template(obj);
-        } else{
-           grunt.log.writeln(extension + ' is unknown file extension');
-           return;
-        }
-        
-        var relativePath = filePath.substring(src.length + 1, filePath.lastIndexOf('.')) + '.html';
-        
-        var destFilePath = path.join(dest, relativePath);
-        grunt.file.write(destFilePath, content);
-        count++;
-        
-      });
+      var template = rule.template;
       
+      var file = grunt.file.read(filePath);
+      var extension = path.extname(filePath);
+      var content = '';
+      
+      if (extension === '.html'){
+         content = template({body: file});
+      } else if (extension === '.json'){
+         var obj = JSON.parse(file);
+         content = template(obj);
+      } else{
+         grunt.log.writeln(extension + ' is unknown file extension');
+         return;
+      }
+      
+      var relativePath = path.relative(cwd, filePath);
+      var targetFileRelativePath = relativePath.substring(0, relativePath.lastIndexOf('.')) + '.html';
+      var destFilePath = path.join(dest, targetFileRelativePath);
+      
+      grunt.file.write(destFilePath, content);
+      
+      count++;
+      
+    }
+    
+    grunt.file.expand(srcs).map(function(srcFile){
+      var extension = path.extname(srcFile);
+      if (extension === '.hbt'){
+        _.each(rules, function(rule, idx){
+          
+          if (path.join(cwd, rule.layout) === srcFile){
+            
+            grunt.file.expand(path.join(cwd, rule.url)).map(function(url){
+              executeGenerate(url, rule);
+            });
+            //rules.splice(idx);
+          }
+        });
+      } else if (extension === '.html' || extension === '.json'){
+        _.each(rules, function(rule, idx){
+          
+          if (grunt.file.isMatch(path.join(cwd, rule.url), srcFile)){
+            executeGenerate(srcFile, rule);
+          }
+        });
+      } else{
+        grunt.log.writeln(extension + ' is unknown file extension');
+        return;
+      }
     });
    
     grunt.log.writeln('total: ' + count + ' files generated');
