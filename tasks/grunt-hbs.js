@@ -19,11 +19,19 @@ module.exports = function(grunt) {
     
     var options = this.options();
     
-    var srcs = this.data.src;
+    var srcs = this.data.src.slice();
+    
+    if (!srcs || srcs.length == 0){
+      return;
+    }
+    
     var dest = this.data.dest;
     var cwd = this.data.cwd;
     var rules = this.data.rules.slice();
     
+    for(var i = 0; i < srcs.length; i++){
+      srcs[i] =  path.join(cwd, srcs[i]);
+    }
     //pre compile template
     _.each(rules, function(rule){
       var layoutFilePath = path.join(cwd, rule.layout);
@@ -31,7 +39,6 @@ module.exports = function(grunt) {
       var template =  handlebars.compile(layoutFileContent);
       rule.template = template;
     });
-    
     var count = 0;
     
     var executeGenerate = function(filePath, rule){
@@ -60,9 +67,12 @@ module.exports = function(grunt) {
       
       count++;
       
-    }
+    };
+    
+  
     
     grunt.file.expand(srcs).map(function(srcFile){
+      
       var extension = path.extname(srcFile);
       if (extension === '.hbt'){
         _.each(rules, function(rule, idx){
